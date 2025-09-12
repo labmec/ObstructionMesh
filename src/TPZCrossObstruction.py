@@ -12,7 +12,7 @@ from dataclasses import dataclass, field
 import gmsh
 
 from src.TPZModuleTypology import TPZModuleTypology
-from src.TPZMeshModeling import TPZMeshModeling
+from TPZGmshToolkit import TPZGmshToolkit
 #%% ****************** 
 #   CLASS DEFINITION
 #   ******************
@@ -198,7 +198,7 @@ class TPZCrossObstruction(TPZModuleTypology):
             [cx + r, cy - r, l]
         ]
 
-        ob_points = TPZMeshModeling.CreatePoints(point_coord, lc)
+        ob_points = TPZGmshToolkit.CreatePoints(point_coord, lc)
 
         return ob_points
 
@@ -227,8 +227,8 @@ class TPZCrossObstruction(TPZModuleTypology):
             gp_arcs = group["arcs"]
             gp_lines = group["lines"]
 
-            a = TPZMeshModeling.CreateCircleArcs(gp_arcs)
-            l = TPZMeshModeling.CreateLines(gp_lines)
+            a = TPZGmshToolkit.CreateCircleArcs(gp_arcs)
+            l = TPZGmshToolkit.CreateLines(gp_lines)
             
             obs_lines += a
             obs_lines += l
