@@ -1,0 +1,10 @@
+# Ignore mesh files
+*.vtk
+*.msh
+
+# Byte-code files
+*.pyc
+__pycache__/
+
+# Json files
+*.json
