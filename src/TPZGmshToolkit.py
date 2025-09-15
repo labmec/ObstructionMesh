@@ -1,12 +1,10 @@
-from dataclasses import dataclass
 from typing import ClassVar
 import json
 import gmsh
 import sys
 import os
 
-@dataclass
-class TPZMeshModeling:
+class TPZGmshToolkit:
     kernel: ClassVar[str] = 'occ'
 
     @staticmethod
@@ -52,10 +50,10 @@ class TPZMeshModeling:
         points = []
         for coord in PointCoordinates:
             x,y,z = coord
-            if TPZMeshModeling.kernel == 'occ': 
+            if TPZGmshToolkit.kernel == 'occ': 
                 p = gmsh.model.occ.addPoint(x,y,z,lc)
 
-            elif TPZMeshModeling.kernel == 'built':
+            elif TPZGmshToolkit.kernel == 'built':
                 p = gmsh.model.geo.addPoint(x,y,z,lc)
             
             points.append(p)
@@ -70,10 +68,10 @@ class TPZMeshModeling:
         lines = []
         for index in LineIndexes:
             init, end = index
-            if TPZMeshModeling.kernel == 'occ':
+            if TPZGmshToolkit.kernel == 'occ':
                 l = gmsh.model.occ.addLine(init, end)
 
-            elif TPZMeshModeling.kernel == 'built':
+            elif TPZGmshToolkit.kernel == 'built':
                 l = gmsh.model.geo.addLine(init, end)
 
             lines.append(l)
@@ -87,10 +85,10 @@ class TPZMeshModeling:
         """
         curves = []
         for  index in (CurveLoopIndexes):
-            if TPZMeshModeling.kernel == 'occ':
+            if TPZGmshToolkit.kernel == 'occ':
                 c = gmsh.model.occ.addCurveLoop(index)
 
-            elif TPZMeshModeling.kernel == 'built':
+            elif TPZGmshToolkit.kernel == 'built':
                 c = gmsh.model.geo.addCurveLoop(index)
 
             curves.append(c)
@@ -104,10 +102,10 @@ class TPZMeshModeling:
         """
         planes = []
         for index in (PlaneIndexes):
-            if TPZMeshModeling.kernel == 'occ': 
+            if TPZGmshToolkit.kernel == 'occ': 
                 plane = gmsh.model.occ.addPlaneSurface(index) 
 
-            elif TPZMeshModeling.kernel == 'built':
+            elif TPZGmshToolkit.kernel == 'built':
                 plane = gmsh.model.geo.addPlaneSurface(index) 
 
             planes.append(plane)
@@ -121,10 +119,10 @@ class TPZMeshModeling:
         """
         surface_loop = []
         for index in (SurfaceLoopIndexes):
-            if TPZMeshModeling.kernel == 'occ':
+            if TPZGmshToolkit.kernel == 'occ':
                 s = gmsh.model.occ.addSurfaceLoop(index)
 
-            elif TPZMeshModeling.kernel == 'built':
+            elif TPZGmshToolkit.kernel == 'built':
                 s = gmsh.model.geo.addSurfaceLoop(index)
 
             surface_loop.append(s)
@@ -139,10 +137,10 @@ class TPZMeshModeling:
 
         volume = []
         for index in (VolumesIndexes):
-            if TPZMeshModeling.kernel == 'occ':
+            if TPZGmshToolkit.kernel == 'occ':
                 v = gmsh.model.occ.addVolume([index])
 
-            elif TPZMeshModeling.kernel == 'built':
+            elif TPZGmshToolkit.kernel == 'built':
                 v = gmsh.model.geo.addVolume([index])
 
             volume.append(v)
@@ -166,10 +164,10 @@ class TPZMeshModeling:
         for coord in arc_points:
             start, center, end = coord
 
-            if TPZMeshModeling.kernel == 'occ':
+            if TPZGmshToolkit.kernel == 'occ':
                 arc = gmsh.model.occ.addCircleArc(start, center, end)
 
-            elif TPZMeshModeling.kernel == 'built':
+            elif TPZGmshToolkit.kernel == 'built':
                 arc = gmsh.model.occ.addCircleArc(start, center, end)
 
             arcs.append(arc)
@@ -300,14 +298,14 @@ class TPZMeshModeling:
         """
         Synchronizes the gmsh CAD with the gmsh kernel
         """
-        if TPZMeshModeling.kernel == 'occ':
+        if TPZGmshToolkit.kernel == 'occ':
             gmsh.model.occ.synchronize()
         
-        elif TPZMeshModeling.kernel == 'built':
+        elif TPZGmshToolkit.kernel == 'built':
             gmsh.model.geo.synchronize()
 
     @staticmethod
-    def ShowModel(meshDim: int =-1)->None:
+    def ShowModel()->None:
         """
         Show the model
         """
@@ -354,7 +352,7 @@ class TPZMeshModeling:
         1 -> OPENCASCADE
         """
         option = {0: 'built', 1: 'occ'}
-        TPZMeshModeling.kernel = option[kernel]
+        TPZGmshToolkit.kernel = option[kernel]
 
     @staticmethod
     def CreateMesh(meshDim: int):
