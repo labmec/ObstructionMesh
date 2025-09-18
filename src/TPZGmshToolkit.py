@@ -28,8 +28,8 @@ class TPZGmshToolkit:
                 os.rename(oldJson, JsonNewPath+oldJson)
 
             else:
-                old_file = fileName + extension
-                os.rename(old_file, MeshNewPath+old_file)
+                oldFile = fileName + extension
+                os.rename(oldFile, MeshNewPath+oldFile)
 
     @staticmethod
     def CreatePoints(PointCoordinates: list[int], lc: float)->list[int]:
@@ -106,7 +106,7 @@ class TPZGmshToolkit:
         """
         Returns a list of integers as the created surface loop tags
         """
-        surface_loop = []
+        surfaceLoop = []
         for index in (SurfaceLoopIndexes):
             if TPZGmshToolkit.kernel == 'occ':
                 s = gmsh.model.occ.addSurfaceLoop(index)
@@ -114,9 +114,9 @@ class TPZGmshToolkit:
             elif TPZGmshToolkit.kernel == 'built':
                 s = gmsh.model.geo.addSurfaceLoop(index)
 
-            surface_loop.append(s)
+            surfaceLoop.append(s)
 
-        return surface_loop
+        return surfaceLoop
 
     @staticmethod
     def CreateVolumes(VolumesIndexes: list)->None:
@@ -148,9 +148,9 @@ class TPZGmshToolkit:
             gmsh.model.addPhysicalGroup(dimension, tag, tag=id, name=name)
 
     @staticmethod
-    def CreateCircleArcs(arc_points: list[int])->list[int]:
+    def CreateCircleArcs(arcPoints: list[int])->list[int]:
         arcs = []
-        for coord in arc_points:
+        for coord in arcPoints:
             start, center, end = coord
 
             if TPZGmshToolkit.kernel == 'occ':
@@ -180,13 +180,13 @@ class TPZGmshToolkit:
         """
         Returns a list of integers as the rectangle surface tags, using the OPENCASCADE kernel
         """
-        square_list = []
+        squareList = []
         for coord in coordinates:
             x, y, z = coord
             square = gmsh.model.occ.addRectangle(x, y, z, sideX, sideY)
-            square_list.append(square)
+            squareList.append(square)
 
-        return square_list
+        return squareList
 
     @staticmethod
     def MakeHoles(object: int, holesList: list, holeDim: int)->list[int]:
@@ -264,9 +264,9 @@ class TPZGmshToolkit:
             - entity_name: only the entity name
             - physical_name: only the physical group name
         """
-        description_int: dict = {"description": 0, "entity_tag":1, "physical_tag":2, "entity_name":3, "physical_name":4}
+        descriptionInt: dict = {"description": 0, "entity_tag":1, "physical_tag":2, "entity_name":3, "physical_name":4}
         
-        gmsh.option.setNumber("Geometry.LabelType", description_int[description])
+        gmsh.option.setNumber("Geometry.LabelType", descriptionInt[description])
 
     @staticmethod
     def TurnOnNormals(size: int=50)->None:
