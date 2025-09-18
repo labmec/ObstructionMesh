@@ -6,203 +6,86 @@ Created by Carlos Puga: 01/13/2024
 #%% ****************** 
 #   IMPORTED MODULES
 #   ******************
-from dataclasses import dataclass, field
 import gmsh
+from typing import Any
+from abc import ABCMeta, abstractmethod
+from dataclasses import dataclass, field
 
 from src.TPZGmshToolkit import TPZGmshToolkit
+
+@dataclass
+class ModuleDataStructure(metaclass=ABCMeta):
+    fDeactivateAttr: bool = field(default=False)
+    
+    def DeactivateAttr(self) -> None:
+        self.fDeactivateAttr = True
+
+    def ActivateAttr(self) -> None:
+        self.fDeactivateAttr = False
+
+    def __setattr__(self, name: str, value: Any) -> None:
+        if not self.fDeactivateAttr:
+            super().__setattr__(name, value)
+
+        else:
+            if hasattr(self, name):
+                return super().__setattr__(name, value)
+            
+            else:
+                raise AttributeError(f"Cannot add new attribute '{name}' when attributes are deactivated.")
+            
+    def __str__(self):
+        fields = ', '.join(f"{key}={value}" for key, value in self.__dict__.items())
+        return f"{self.__class__.__name__}({fields})"
+
 #%% ****************** 
 #   CLASS DEFINITION
 #   ******************
-@dataclass
-class TPZModuleTypology:
+class TPZModuleTypology(ModuleDataStructure):
     """
-    Base class used to generate the module on which 
+    Base class used to generate the module in which 
     the obstruction will be inserted. Every module is 
     created in the origin of cartesian plan
 
     Fields:
         - length: module length
-
         - lc: mesh size (gmsh requirement)
-
         - points: module's points (class provides it)
-
         - lines: module's lines (class provides it)
-
         - curves: module's curve loops (class provides it)
-
         - surfaces: module's surfaces, expcept by the one on which
          the obstruction will be inserted (class provides it)
-
-        - obstruciton_face: module's surface on which the obstruction 
+        - obstructionSurface: module's surface on which the obstruction 
         will be inserted
     """
 #   ****************** 
 #      INITIALIZOR
 #   ******************  
-    _length: float
-    _lc: float
-    _points: tuple[int] = field(init=False, default_factory=tuple)
-    _lines: tuple[int] = field(init=False, default_factory=tuple)
-    _curves: tuple[int] = field(init=False, default_factory=tuple)
-    _surfaces: list[int] = field(init=False, default_factory=list)
-    _obstruction_face: int = field(init=False)
+    def __init__(self, length: float, lc: float, radius:float) -> None:
+            self.fLength = length
+            self.fLC = lc
+            self.fRadius = radius
+            self.fPoints = []
+            self.fArcs = []
+            self.fCurves = []
+            self.fSurfaces = []
+            self.fObstructionSurface = -1
 
-#   ****************** 
-#   GETTERS & SETTERS
-#   ****************** 
-    @property
-    def length(self)->float: return self._length
-    @length.setter
-    def length(self, size)->None: self._length = size
+            return 
 
-    @property
-    def lc(self)->float: return self._lc
-    @lc.setter
-    def lc(self, LC)->None: self._lc = LC  
-
-    @property
-    def points(self)->tuple[int]: return self._points
-    @points.setter
-    def points(self, Points)->None: self._points = Points
-
-    @property
-    def lines(self)->tuple[int]: return self._lines
-    @lines.setter
-    def lines(self, Lines)->None: self._lines = Lines
-
-    @property
-    def curves(self)->tuple[int]: return self._curves
-    @curves.setter
-    def curves(self, Curves)->None: self._curves = Curves
-
-    @property
-    def surfaces(self)->tuple[int]: return self._surfaces
-    @surfaces.setter
-    def surfaces(self, Surfaces)->None: self._surfaces = Surfaces
-
-    @property
-    def obstruction_face(self)->int: return self._obstruction_face
-    @obstruction_face.setter
-    def obstruction_face(self, face)->None: self._obstruction_face = face    
 
 #   ****************** 
 #        METHODS
 #   ******************  
-    def DebugStop(self, message=''):
+    def DebugStop(self, message='') -> None:
         raise ValueError(message + ' YOUR CHANCE TO PUT A BREAK POINT HERE')
-
-#   ****************** 
-#          BOX
-#   ******************  
-    def BoxPoints(self, dx: float, dy: float)->tuple[int]:
-        """
-        Returns the basic points of a rectangular box of dimensions '(dx, dy, length)'
-        with mesh size 'lc'. 
-        """
-        points_coord = [ 
-            [0,0,0],
-            [dx, 0, 0],
-            [dx, dy, 0],
-            [0, dy, 0],
-
-            [0, 0, self.length],
-            [dx, 0, self.length],
-            [dx, dy, self.length],
-            [0, dy, self.length]
-        ]
-
-        points = TPZGmshToolkit.CreatePoints(points_coord, self.lc)
-
-        return points
-    
-    def BoxLines(self)->tuple[int]:
-        """
-        Returns the basic lines of a rectangular box using the points p1, ..., p8.
-        """
-        p1, p2, p3, p4, p5, p6, p7, p8 = self.points
-
-        lines_points = [
-            [p1, p2],
-            [p2, p3],
-            [p3, p4],
-            [p4, p1],
-
-            [p5, p6],
-            [p6, p7],
-            [p7, p8],
-            [p8, p5],
-
-            [p4, p8],
-            [p3, p7],
-            
-            [p1, p5],
-            [p2, p6]
-        ]
-
-        lines = TPZGmshToolkit.CreateLines(lines_points)
-
-        return lines
-    
-    def BoxCurveLoops(self)->tuple[int]:
-        """
-        Returns the basic curve loops of a rectangular box 
-        using the lines l1, ..., l12
-        """
-        l1, l2, l3, l4, l5, l6, l7, l8, l9, l10, l11, l12 = self.lines
-
-        curve_lines = [
-            [l1, l2, l3, l4],
-            [l5, l6, l7, l8],
-            [l3, l10, l7, l9],
-            [l1, l11, l5, l12],
-            [l4, l9, l8, l11],
-            [l2, l10, l6, l12]
-        ] 
-
-        curves = TPZGmshToolkit.CreateCurveLoops(curve_lines)
-
-        return curves
-
-    def BoxSurfaces(self)->tuple[int]:
-        """
-        Returns the basic surfaces of rectangular box 
-        usning the curve loops c1, ..., c2
-        """
-        c1, c2, c3, c4, c5, c6 = self.curves
-
-        surfaces_curves = [
-            [c1],
-            [c2],
-            [c3],
-            [c4],
-            [c5],
-            [c6]
-        ]
-
-        surfaces = TPZGmshToolkit.CreatePlanes(surfaces_curves)
-
-        return surfaces
-
-    def CreateBox(self, dx:float , dy: float)->None:
-        """
-        Create a box with dimensions 'dx', 'dy' and 'length'.
-        """
-        # creating the base box
-        self.points = self.BoxPoints(dx, dy)
-        self.lines = self.BoxLines()
-        self.curves = self.BoxCurveLoops()
-        s1, s2, s3, s4, s5, s6 = self.BoxSurfaces()
-
-        self.surfaces = [s1,s3,s4,s5,s6]
-        self.obstruction_face = s2
 
 #   ****************** 
 #       CYLINDER
 #   ******************  
-    def CylinderPoints(self, radius:float)->tuple[int]:   
+    def CylinderPoints(self, radius:float) -> None:   
         """
-        Returns the cylinder points
+        Creates the points of the cylinder inlet surface
         """
         points_coord = [
             [0, 0, 0],
@@ -211,70 +94,54 @@ class TPZModuleTypology:
             [-radius, 0, 0],
             [0, -radius, 0],
 
-            [0, 0, self.length],
-            [radius, 0, self.length],
-            [0, radius, self.length],
-            [-radius, 0, self.length],
-            [0, -radius, self.length]
         ]
 
-        points = TPZGmshToolkit.CreatePoints(points_coord, self.lc)
+        self.fPoints = TPZGmshToolkit.CreatePoints(points_coord, self.fLC)
 
-        return points
+        return 
 
-    def CylinderArcs(self)->tuple[int]:
+    def CylinderArcs(self) -> None:
         """
-        Returns the lines of the cylinder
+        Creates the arcs of the cylinder inlet surface
         """
-        p1, p2, p3, p4, p5, p6, p7, p8, p9, p10 = self.points
+        p1, p2, p3, p4, p5 = self.fPoints
 
         line_points = [
             [p2, p1, p3],
             [p3, p1, p4],
             [p4, p1, p5],
             [p5, p1, p2],
-
-            [p7, p6, p8],
-            [p8, p6, p9],
-            [p9, p6, p10],
-            [p10, p6, p7]
         ]
 
-        arcs = TPZGmshToolkit.CreateCircleArcs(line_points)
+        self.fArcs = TPZGmshToolkit.CreateCircleArcs(line_points)
 
         gmsh.model.occ.remove([(0, p1)]) # center of the back circle
-        gmsh.model.occ.remove([(0, p6)]) # center of the front circle
-        # this was made due to some problems we faced creating the mesh
 
-        return arcs
-    
-    def CylinderCurves(self)->tuple[int]:
+        return 
+
+    def CylinderCurves(self) -> None:
         """
-        Returns the cylinder curve loops
+        Creates the cylinder inlet surface curve loop
         """
-        l1, l2, l3, l4, l5, l6, l7, l8 = self.lines
+        self.fCurves.append(gmsh.model.occ.addCurveLoop(self.fArcs))
 
-        back = gmsh.model.occ.addCurveLoop([l1, l2, l3, l4])
-        front = gmsh.model.occ.addCurveLoop([l5, l6, l7, l8])
+        return 
 
-        curves = (back, front)
-
-        return curves
-    
-    def CylinderSurfaces(self)->list[int]:
+    def CylinderSurfaces(self) -> None:
         """
-        Returns the cylinder surfaces
+        Creates the cylinder surfaces
         """
-        c1, c2 = self.curves
-
-        back = gmsh.model.occ.addPlaneSurface([c1])
-        front = gmsh.model.occ.addPlaneSurface([c2])
+        back = gmsh.model.occ.addPlaneSurface(self.fCurves)
+        
+        front = gmsh.model.occ.copy([(2, back)])[0][1]
+        gmsh.model.occ.translate([(2, front)], 0, 0, self.fLength)
 
         contour = gmsh.model.occ.addThruSections([back, front], makeSolid=False)
 
-        surfaces = [back, front] + [c[1] for c in contour]
+        self.fSurfaces = [back] + [c[1] for c in contour]
+        self.fObstructionSurface = front
 
-        return surfaces
+        return 
 
 
     def CreateCylinder(self, radius:float)->None:
@@ -282,11 +149,14 @@ class TPZModuleTypology:
         Create a cylinder with 'radius'
         """
 
-        self.points = self.CylinderPoints(radius)
-        self.lines = self.CylinderArcs()
-        self.curves = self.CylinderCurves()
-        s1, s2, s3, s4, s5, s6 = self.CylinderSurfaces()
+        self.CylinderPoints(radius)
+        self.CylinderArcs()
+        self.CylinderCurves()
+        self.CylinderSurfaces()
 
-        self.surfaces = [s1, s3, s4, s5, s6]
-        self.obstruction_face = s2
-# %%
+    @abstractmethod
+    def Move(self, dx:float, dy:float, dz:float)->None:
+        """
+        Move the module to the desired position
+        """
+        raise NotImplementedError("This method should be overridden in subclasses")
