@@ -40,7 +40,6 @@ class TPZSimpleObstruction(TPZModuleTypology):
         self.fObstructionSurface:int = -1
         self.fObstructionCX:float = -1.
         self.fObstructionCY:float = -1.
-        self.fVolumeID:int = -1
 
         self.DeactivateAttr()
 
@@ -66,7 +65,7 @@ class TPZSimpleObstruction(TPZModuleTypology):
         if self.fObstructionRadius > self.fRadius:
             self.DebugStop('ERROR: obstruction radius not compatible with cylinder dimensions!')
 
-        self.CreateCylinder(self.fRadius)
+        self.CreateCylinder()
 
         return
 
