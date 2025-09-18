@@ -25,10 +25,9 @@ class TPZSimpleObstruction(TPZModuleTypology):
     to generates the module body and insert the obstruction.
 
     Fields: 
-        - obstruction_radius: size of the obstrcution radius
-        - obstruction_cx: x coordinate to place the obstruction
-        - obstruction_cy: y coordinate to place the obstruction
-        - id: obstruction volume's identification (provided by the class itself)
+        - obstructionRadius: size of the obstruction radius
+        - obstructionCX: x coordinate to place the obstruction
+        - obstructionCY: y coordinate to place the obstruction
     """
 #   ****************** 
 #      INITIALIZER
@@ -75,7 +74,7 @@ class TPZSimpleObstruction(TPZModuleTypology):
         """
         self.CheckTypology()
 
-        # creating the obstruction on surface obstruction_face
+        # creating the obstruction on surface obstruction face
         obstruction = self.CreateObstruction()
 
         # calculating the boolean difference between the domain and the obstruction faces  
@@ -102,7 +101,7 @@ class TPZSimpleObstruction(TPZModuleTypology):
         l = self.fLength
         lc = self.fLC
 
-        points_coord = [
+        pointsCoords = [
             [cx, cy, l],
             [cx + r, cy, l],
             [cx, cy + r, l],
@@ -110,7 +109,7 @@ class TPZSimpleObstruction(TPZModuleTypology):
             [cx, cy - r, l]
         ]
 
-        return TPZGmshToolkit.CreatePoints(points_coord, lc)
+        return TPZGmshToolkit.CreatePoints(pointsCoords, lc)
 
     def ObstructionArcs(self, p1:int, p2:int, p3:int, p4:int, p5:int) -> tuple[int]:
         """

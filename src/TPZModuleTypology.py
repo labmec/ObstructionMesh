@@ -57,6 +57,7 @@ class TPZModuleTypology(ModuleDataStructure):
          the obstruction will be inserted (class provides it)
         - obstructionSurface: module's surface on which the obstruction 
         will be inserted
+        - volumeID: module's volume identification (provided by the class itself)
     """
 #   ****************** 
 #      INITIALIZOR
@@ -70,6 +71,7 @@ class TPZModuleTypology(ModuleDataStructure):
             self.fCurves = []
             self.fSurfaces = []
             self.fObstructionSurface = -1
+            self.fVolumeID = -1
 
             return 
 
@@ -83,11 +85,13 @@ class TPZModuleTypology(ModuleDataStructure):
 #   ****************** 
 #       CYLINDER
 #   ******************  
-    def CylinderPoints(self, radius:float) -> None:   
+    def CylinderPoints(self) -> None:   
         """
         Creates the points of the cylinder inlet surface
         """
-        points_coord = [
+        radius = self.fRadius
+
+        pointsCoords = [
             [0, 0, 0],
             [radius, 0, 0],
             [0, radius, 0],
@@ -96,7 +100,7 @@ class TPZModuleTypology(ModuleDataStructure):
 
         ]
 
-        self.fPoints = TPZGmshToolkit.CreatePoints(points_coord, self.fLC)
+        self.fPoints = TPZGmshToolkit.CreatePoints(pointsCoords, self.fLC)
 
         return 
 
@@ -106,14 +110,14 @@ class TPZModuleTypology(ModuleDataStructure):
         """
         p1, p2, p3, p4, p5 = self.fPoints
 
-        line_points = [
+        linePoints = [
             [p2, p1, p3],
             [p3, p1, p4],
             [p4, p1, p5],
             [p5, p1, p2],
         ]
 
-        self.fArcs = TPZGmshToolkit.CreateCircleArcs(line_points)
+        self.fArcs = TPZGmshToolkit.CreateCircleArcs(linePoints)
 
         gmsh.model.occ.remove([(0, p1)]) # center of the back circle
 
@@ -144,12 +148,11 @@ class TPZModuleTypology(ModuleDataStructure):
         return 
 
 
-    def CreateCylinder(self, radius:float)->None:
+    def CreateCylinder(self)->None:
         """
         Create a cylinder with 'radius'
         """
-
-        self.CylinderPoints(radius)
+        self.CylinderPoints()
         self.CylinderArcs()
         self.CylinderCurves()
         self.CylinderSurfaces()
