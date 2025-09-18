@@ -8,17 +8,6 @@ class TPZGmshToolkit:
     kernel: ClassVar[str] = 'occ'
 
     @staticmethod
-    def PrintJson(JsonData: dict, FileName: str)->None:
-        """ 
-        Reads the information from the 'JsonData' dictionary and writes them in a Json file
-        named 'FileName'.
-        """
-        json_object = json.dumps(JsonData, indent=4)
-
-        with open(FileName+".json", "w") as outfile:
-            outfile.write(json_object)
-
-    @staticmethod
     def WriteMeshFiles(FileName: str, *extensions: str)->None:
         """
         Creates files with given extensions from a gmsh model.
