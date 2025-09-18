@@ -8,3 +8,6 @@ __pycache__/
 
 # Json files
 *.json
+
+# Ignore virtual environment directories
+venv/**
