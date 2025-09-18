@@ -13,7 +13,7 @@ import numpy as np
 import gmsh
 
 from src.TPZModuleTypology import TPZModuleTypology
-from src.TPZMeshModeling import TPZMeshModeling
+from TPZGmshToolkit import TPZGmshToolkit
 #%% ****************** 
 #   CLASS DEFINITION
 #   ******************
@@ -168,7 +168,7 @@ class TPZMultipleObstruction(TPZModuleTypology):
             [cx, cy - r, l]
         ]
 
-        ob_points = TPZMeshModeling.CreatePoints(point_coords, lc)
+        ob_points = TPZGmshToolkit.CreatePoints(point_coords, lc)
 
         return ob_points
 
@@ -185,7 +185,7 @@ class TPZMultipleObstruction(TPZModuleTypology):
             [p5, p1, p2]
         ]
 
-        ob_arcs = TPZMeshModeling.CreateCircleArcs(arc_points)
+        ob_arcs = TPZGmshToolkit.CreateCircleArcs(arc_points)
 
         gmsh.model.occ.remove([(0, p1)])
 

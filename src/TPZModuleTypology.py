@@ -9,7 +9,7 @@ Created by Carlos Puga: 01/13/2024
 from dataclasses import dataclass, field
 import gmsh
 
-from src.TPZMeshModeling import TPZMeshModeling
+from src.TPZGmshToolkit import TPZGmshToolkit
 #%% ****************** 
 #   CLASS DEFINITION
 #   ******************
@@ -112,7 +112,7 @@ class TPZModuleTypology:
             [0, dy, self.length]
         ]
 
-        points = TPZMeshModeling.CreatePoints(points_coord, self.lc)
+        points = TPZGmshToolkit.CreatePoints(points_coord, self.lc)
 
         return points
     
@@ -140,7 +140,7 @@ class TPZModuleTypology:
             [p2, p6]
         ]
 
-        lines = TPZMeshModeling.CreateLines(lines_points)
+        lines = TPZGmshToolkit.CreateLines(lines_points)
 
         return lines
     
@@ -160,7 +160,7 @@ class TPZModuleTypology:
             [l2, l10, l6, l12]
         ] 
 
-        curves = TPZMeshModeling.CreateCurveLoops(curve_lines)
+        curves = TPZGmshToolkit.CreateCurveLoops(curve_lines)
 
         return curves
 
@@ -180,7 +180,7 @@ class TPZModuleTypology:
             [c6]
         ]
 
-        surfaces = TPZMeshModeling.CreatePlanes(surfaces_curves)
+        surfaces = TPZGmshToolkit.CreatePlanes(surfaces_curves)
 
         return surfaces
 
@@ -218,7 +218,7 @@ class TPZModuleTypology:
             [0, -radius, self.length]
         ]
 
-        points = TPZMeshModeling.CreatePoints(points_coord, self.lc)
+        points = TPZGmshToolkit.CreatePoints(points_coord, self.lc)
 
         return points
 
@@ -240,7 +240,7 @@ class TPZModuleTypology:
             [p10, p6, p7]
         ]
 
-        arcs = TPZMeshModeling.CreateCircleArcs(line_points)
+        arcs = TPZGmshToolkit.CreateCircleArcs(line_points)
 
         gmsh.model.occ.remove([(0, p1)]) # center of the back circle
         gmsh.model.occ.remove([(0, p6)]) # center of the front circle

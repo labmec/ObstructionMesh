@@ -15,7 +15,7 @@ from datetime import datetime
 from dataclasses import dataclass, field
 
 from TPZModuleTypology import TPZModuleTypology
-from TPZMeshModeling import TPZMeshModeling
+from TPZGmshToolkit import TPZGmshToolkit
 #%% ****************** 
 #   CLASS DEFINITION
 #   ******************
@@ -242,7 +242,7 @@ class TPZRandomObstruction(TPZModuleTypology):
             [cx, cy - r, l]
         ]
 
-        ob_points = TPZMeshModeling.CreatePoints(point_coord, lc)
+        ob_points = TPZGmshToolkit.CreatePoints(point_coord, lc)
 
         return ob_points
 
@@ -259,7 +259,7 @@ class TPZRandomObstruction(TPZModuleTypology):
             [p5, p1, p2]
         ]
 
-        ob_arcs = TPZMeshModeling.CreateCircleArcs(arc_points)
+        ob_arcs = TPZGmshToolkit.CreateCircleArcs(arc_points)
 
         gmsh.model.occ.remove([(0, p1)])
 

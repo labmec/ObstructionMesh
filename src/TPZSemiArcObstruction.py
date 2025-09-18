@@ -15,7 +15,7 @@ import gmsh
 import sys
 
 from src.TPZModuleTypology import TPZModuleTypology
-from src.TPZMeshModeling import TPZMeshModeling
+from TPZGmshToolkit import TPZGmshToolkit
 #%% ****************** 
 #   CLASS DEFINITION
 #   ******************
@@ -194,7 +194,7 @@ class TPZSemiArcObstruction(TPZModuleTypology):
         ]
 
 
-        ob_points = TPZMeshModeling.CreatePoints(points_coord, lc)
+        ob_points = TPZGmshToolkit.CreatePoints(points_coord, lc)
 
         return ob_points
 

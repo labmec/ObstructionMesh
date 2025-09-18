@@ -12,7 +12,7 @@ from dataclasses import dataclass, field
 import gmsh
 
 from src.TPZModuleTypology import TPZModuleTypology
-from src.TPZMeshModeling import TPZMeshModeling
+from src.TPZGmshToolkit import TPZGmshToolkit
 #%% ****************** 
 #   CLASS DEFINITION
 #   ******************
@@ -169,7 +169,7 @@ class TPZSimpleObstruction(TPZModuleTypology):
             [cx, cy - r, l]
         ]
 
-        ob_points = TPZMeshModeling.CreatePoints(points_coord, lc)
+        ob_points = TPZGmshToolkit.CreatePoints(points_coord, lc)
 
         return ob_points
 
@@ -186,7 +186,7 @@ class TPZSimpleObstruction(TPZModuleTypology):
             [p5, p1, p2]
         ]
 
-        ob_arcs = TPZMeshModeling.CreateCircleArcs(arc_points)
+        ob_arcs = TPZGmshToolkit.CreateCircleArcs(arc_points)
 
         gmsh.model.occ.remove([(0, p1)]) # center of obstruction circle
 
