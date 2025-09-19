@@ -8,16 +8,15 @@ Created by Carlos Puga: 01/15/2024
 #%% ****************** 
 #   IMPORTED MODULES
 #   ******************
-from dataclasses import dataclass, field
 import numpy as np
 import gmsh
 
 from src.TPZModuleTypology import TPZModuleTypology
-from TPZGmshToolkit import TPZGmshToolkit
+from src.TPZGmshToolkit import TPZGmshToolkit
+
 #%% ****************** 
 #   CLASS DEFINITION
 #   ******************
-@dataclass
 class TPZMultipleObstruction(TPZModuleTypology):
     """
     This class creates several circular obstructions in the 
@@ -27,108 +26,45 @@ class TPZMultipleObstruction(TPZModuleTypology):
     to generates the module body and insert the obstruction.
 
     Fields: 
-        - module_typology: information about the type 
-        of module to be constructed. Currently is only availabe rectangular 
-        modules. More information are required: 
-            * Rectangular -> {dx: length on x-direction, dy: length on y-direction}
-            * Circular -> {radius: modules'radius}
-
-        - obstruction_radius: size of the obstrcution radius
-
-        - obstruction_distance: distance from the center of the domain
-
-        - obstruction_cx: x coordinate to place the obstruction
-
-        - obstruction_cy: y coordinate to place the obstruction
-
-        - id: obstruction volume's identification (provided by the class itself)
+        - fObstructionRadius: size of the obstruction radius
+        - fObstructionDistance: distance from the center of the domain
+        - fObstructionCX: x coordinate to place the obstruction
+        - fObstructionCY: y coordinate to place the obstruction
     """
 #   ****************** 
 #      INITIALIZOR
 #   ******************  
-    _module_typology: tuple[str, dict]
-    _obstruction_radius: float
-    _obstruction_distance: float
-    _obstruction_cx: float = field(init=False)
-    _obstruction_cy: float = field(init=False)
-    _id: int = field(init=False)
+    def __init__(self, length:float, lc:float, radius:float, obstructionRadius:float, obstructionDistance:float) -> None:
+        super().__init__(length=length, lc=lc, radius=radius)
+        
+        self.fObstructionRadius: float = obstructionRadius
+        self.fObstructionDistance: float = obstructionDistance
+        self.fObstructionCX: float = 0.
+        self.fObstructionCY: float = 0.
 
-    def __post_init__(self):
+        self.DeactivateAttr()
+
+        self.__post_init__()
+
+        return
+
+    def __post_init__(self) -> None:
         self.CreateDomain()
-    
-#   ****************** 
-#   GETTERS & SETTERS
-#   ******************  
-    @property
-    def module_typology(self)->tuple[str, dict]: return self._module_typology
-    @module_typology.setter
-    def module_typology(self, Module)->None: self._module_typology = Module
-
-    @property
-    def obstruction_radius(self)->float: return self._obstruction_radius
-    @obstruction_radius.setter
-    def obstruction_radius(self, R)->None: self._obstruction_radius = R
-
-    @property
-    def obstruction_distance(self)->float: return self._obstruction_distance
-    @obstruction_distance.setter
-    def obstruction_distance(self, d)->None: self._obstruction_distance = d
-
-    @property
-    def obstruction_cx(self)->float: return self._obstruction_cx
-    @obstruction_cx.setter
-    def obstruction_cx(self, cx)->None: self._obstruction_cx = cx
-
-    @property
-    def obstruction_cy(self)->float: return self._obstruction_cy
-    @obstruction_cy.setter
-    def obstruction_cy(self, cy)->None: self._obstruction_cy = cy
-
-    @property
-    def id(self)->int: return self._id
-    @id.setter
-    def id(self, ID)->None: self._id = ID
+        return
 
 #   ****************** 
 #        METHODS
 #   ******************  
     def CheckTypology(self)->None:
-        m_type, m_characteristics = self.module_typology
-        keys = list(m_characteristics.keys())
 
-        if m_type == 'Rectangular':
-            if not 'dx' in keys and not 'dy' in keys:
-                self.DebugStop('ERROR: Not enough information to create the box!')
+        if (self.fObstructionRadius + self.fObstructionDistance) > self.fRadius:
+            self.DebugStop('ERROR: obstruction radius not compatible with cylinder dimensions!')
 
-            dx = m_characteristics['dx']
-            dy = m_characteristics['dy']
+        self.CreateCylinder()
 
-            self.obstruction_cx = dx/2
-            self.obstruction_cy = dy/2
+        return
 
-            if (self.obstruction_radius+self.obstruction_distance) > dx or (self.obstruction_radius+self.obstruction_distance) > dy:
-                self.DebugStop('ERROR: obstruction radius not compatible with box dimensions!')
-
-            self.CreateBox(dx, dy)
-
-        elif m_type == 'Circular':
-            if not 'radius' in keys:
-                self.DebugStop('ERROR: Not enough information to create the box!')
-
-            radius = m_characteristics['radius']
-
-            self.obstruction_cx = 0
-            self.obstruction_cy = 0
-
-            if (self.obstruction_radius+self.obstruction_distance) > radius:
-                self.DebugStop('ERROR: obstruction radius not compatible with cylinder dimensions!')
-
-            self.CreateCylinder(radius)
-
-        else:
-            self.DebugStop(f"ERROR: I'm sorry the typology {m_type} has not been implemented yet")
-
-    def CreateDomain(self)->None:
+    def CreateDomain(self) -> None:
         """
         Generates the module with a circular obstruction on gmsh.
         """
@@ -138,29 +74,30 @@ class TPZMultipleObstruction(TPZModuleTypology):
         obstructions = self.CreateObstruction()
 
         # calculating the boolean difference between the domain and the obstruction faces  
-        new_surfaces = gmsh.model.occ.fragment([(2, self.obstruction_face)], [(2, obs) for obs in obstructions])
+        newSurfaces = gmsh.model.occ.fragment([(2, self.fObstructionSurface)], [(2, obs) for obs in obstructions])
 
-        domain_surfaces = self.surfaces + [surface[1] for surface in new_surfaces[0]]
+        domainSurfaces = self.fSurfaces + [surface[1] for surface in newSurfaces[0]]
         # creating the module volume
-        surface_loop = gmsh.model.occ.addSurfaceLoop(domain_surfaces)
-        domain_volume = gmsh.model.occ.addVolume([surface_loop])
+        surfaceLoop = gmsh.model.occ.addSurfaceLoop(domainSurfaces)
 
-        self.id = domain_volume
+        self.fVolumeID = gmsh.model.occ.addVolume([surfaceLoop])
+
+        return
 
 #   ****************** 
 #        OBSTRUCTION
 #   ******************  
-    def ObstructionPoints(self)->tuple[int]:
+    def ObstructionPoints(self) -> list[int]:
         """
         Returns the points belonging to the obstruction
         """
-        cx = self.obstruction_cx
-        cy = self.obstruction_cy
-        r = self.obstruction_radius
-        l = self.length
-        lc = self.lc
+        cx = self.fObstructionCX
+        cy = self.fObstructionCY
+        r = self.fObstructionRadius
+        l = self.fLength
+        lc = self.fLC
 
-        point_coords = [
+        pointCoords = [
             [cx, cy, l],
             [cx + r, cy, l],
             [cx, cy + r, l],
@@ -168,63 +105,61 @@ class TPZMultipleObstruction(TPZModuleTypology):
             [cx, cy - r, l]
         ]
 
-        ob_points = TPZGmshToolkit.CreatePoints(point_coords, lc)
+        return TPZGmshToolkit.CreatePoints(pointCoords, lc)
 
-        return ob_points
-
-    def ObstructionArcs(self, points: list[int])->tuple[int]:
+    def ObstructionArcs(self, points: list[int]) -> list[int]:
         """
         Returns the lines belonging to the obstruction
         """
         p1, p2, p3, p4, p5 = points
 
-        arc_points = [
+        arcPoints = [
             [p2, p1, p3],
             [p3, p1, p4],
             [p4, p1, p5],
             [p5, p1, p2]
         ]
 
-        ob_arcs = TPZGmshToolkit.CreateCircleArcs(arc_points)
+        ob_arcs = TPZGmshToolkit.CreateCircleArcs(arcPoints)
 
         gmsh.model.occ.remove([(0, p1)])
 
         return ob_arcs
 
-    def CreateObstruction(self)->list[int]:
+    def CreateObstruction(self) -> list[int]:
         """
         Returns the obstruction surface id
         """
         angles = [0,45,90,135,180,225,270,315]
         
-        origin_x = self.obstruction_cx
-        origin_y = self.obstruction_cy
-        r = self.obstruction_distance
-        
-        multiple_obs = []
+        originX = self.fObstructionCX
+        originY = self.fObstructionCY
+        r = self.fObstructionDistance
 
-        center_points = self.ObstructionPoints()
-        center_arcs = self.ObstructionArcs(center_points)
-        center_curves = gmsh.model.occ.addCurveLoop(center_arcs)        
-        center_surface = gmsh.model.occ.addPlaneSurface([center_curves])
+        multipleObs = []
 
-        multiple_obs.append(center_surface)
+        centerPoints = self.ObstructionPoints()
+        centerArcs = self.ObstructionArcs(centerPoints)
+        centerCurves = gmsh.model.occ.addCurveLoop(centerArcs)        
+        centerSurface = gmsh.model.occ.addPlaneSurface([centerCurves])
+
+        multipleObs.append(centerSurface)
 
         for theta in angles:
-            self.obstruction_cx = r*np.cos(np.deg2rad(theta)) + origin_x
-            self.obstruction_cy = r*np.sin(np.deg2rad(theta)) + origin_y
+            self.fObstructionCX = r*np.cos(np.deg2rad(theta)) + originX
+            self.fObstructionCY = r*np.sin(np.deg2rad(theta)) + originY
 
             points = self.ObstructionPoints()
             arcs = self.ObstructionArcs(points) 
             curves = gmsh.model.occ.addCurveLoop(arcs)
-            circle_surface = gmsh.model.occ.addPlaneSurface([curves])
+            circleSurface = gmsh.model.occ.addPlaneSurface([curves])
 
-            multiple_obs.append(circle_surface)
+            multipleObs.append(circleSurface)
 
-        return multiple_obs
+        return multipleObs
     
     def Move(self, dx:float, dy:float, dz:float):
         """
         Moves the module (dx, dy, dz)
         """
-        gmsh.model.occ.translate([ (3,self.id)], dx, dy, dz)
+        gmsh.model.occ.translate([ (3,self.fVolumeID)], dx, dy, dz)
