@@ -2,11 +2,6 @@
 This script is a new version of how to create pipe modules with obstructions
 """
 #%% ****************** 
-#   IMPORTED MODULES
-#   ******************
-import gmsh
-
-#%% ****************** 
 #   IMPORTED CLASSES
 #   ******************
 from src.TPZGmshToolkit import TPZGmshToolkit
@@ -16,6 +11,7 @@ from src.TPZCrossObstruction import TPZCrossObstruction
 from src.TPZRandomObstruction import TPZRandomObstruction
 from src.TPZMultipleObstruction import TPZMultipleObstruction
 from src.TPZSemiArcObstruction import TPZSemiArcObstruction
+from src.TPZModel import TPZModel
 from src.TPZVtkGenerator import TPZVtkGenerator
 
 
@@ -26,87 +22,79 @@ def main()->None:
     """
     Main function
     """
+    outputFile = "Example101"
+
     mm = 1e-3
-    cm = mm*10
+    cm = 10 * mm
 
     # "Input for module generation"
-    length = 50*cm
-    radius = 4.5*cm
-
     lc = 1e-2
+    length = 50 * cm
+    radius = 4.5 * cm
 
     # "Input for obstruction generation"
-    obstructionDiameter = 1*cm
-    
+    obstructionDiameter = 1 * cm
+
     TPZGmshToolkit.Begin()
 
     TPZGmshToolkit.TurnOnLabels('surface', 'volume')
     TPZGmshToolkit.TurnOnRepresentation('surfaces')
     
     TPZGmshToolkit.TurnOnNormals()
-    # TPZMeshModeling.TurnOnTangents()
 
     # "Input for mesh generation"
     meshDim = 3
+    meshSize = 5 * cm
 
     # "Creating the obstructions"
     modules = [
-        TPZSimpleObstruction(length=length, lc=lc, radius=radius, obstructionRadius=obstructionDiameter/2),
-        TPZCrossObstruction(length=length, lc=lc, radius=radius, obstructionWidth=1*cm, obstructionHeight=1*cm),
-        TPZRandomObstruction(length=length, lc=lc, radius=radius, obstructionRadius=obstructionDiameter/2, nObstructions=5),
-        TPZMultipleObstruction(length=length, lc=lc, radius=radius, obstructionRadius=obstructionDiameter/2, obstructionDistance=1.5*cm),
-        TPZSemiArcObstruction(length=length, lc=lc, radius=radius, obstructionRadius=obstructionDiameter/2),
+        TPZSimpleObstruction(length=length, lc=lc, radius=radius, obstructionRadius=obstructionDiameter / 2),
+        TPZCrossObstruction(length=length, lc=lc, radius=radius, obstructionWidth=1 * cm, obstructionHeight=1 * cm),
+        TPZRandomObstruction(length=length, lc=lc, radius=radius, obstructionRadius=obstructionDiameter / 2, nObstructions=5),
+        TPZMultipleObstruction(length=length, lc=lc, radius=radius, obstructionRadius=obstructionDiameter / 2, obstructionDistance=1.5 * cm),
+        TPZSemiArcObstruction(length=length, lc=lc, radius=radius, obstructionRadius=obstructionDiameter / 2),
         TPZNoObstruction(length=length, lc=lc, radius=radius)
     ]
     
-    #todo Create the Class TPZModelToolkit and include the method "BuildModel"
-    "Moving them to the right place"
-    for i, module in enumerate(modules):
-        module.Move(0, 0, length*i)
-    
-    # "Joining them all in one"
-    gmsh.model.occ.removeAllDuplicates()
-    #todo unitl here
+    # building the model
+    model = TPZModel(modules)
+    model.BuildModel()
 
-    #todo add the testObs methods (latest version)
-    # physical_group = [
-    #     [(3, [i + 1 for i, _ in enumerate(modules) ]), 1, "Domain"],
-    #     [(2, [1]), 2, "PressIn"],
-    #     [(2, [12]), 3, "PressOut"],
-    #     [(2, [2, 3, 4, 5, 8, 9, 10, 11, 1 , 12]), 4, "NoSlip"],
-    #     [(2, [2, 3, 4, 5, 8, 9, 10, 11]), 5, "NoPenetration"],
-    #     [(2, [6]), 100, "Obstruction"],
-    #     [(2, [7]), 101, "Orifice"],
-    # ]
+    model.ExtractEntities()
 
-    # "Creating the elements"
-    TPZGmshToolkit.Synchronize()
-    TPZGmshToolkit.ShowModel()
+    # getting the model configuration (which surface is which)
+    domains, inletSurface, outletSurface, obstructionSurfaces, wallSurfaces, orificeSurfaces = model.GetModelConfiguration()
 
-    # TPZGmshToolkit.CreatePhysicalGroup(physical_group)
+    # creating physical groups (domain and boundary conditions)
+    model.CreatePhysicalGroups([
+        {"entityDim":3, "entityTags":domains, "name":"Domain", "MaterialID":1},
+        {"entityDim":2, "entityTags":inletSurface, "name":"PressIn", "MaterialID":2},
+        {"entityDim":2, "entityTags":outletSurface, "name":"PressOut", "MaterialID":3},
+        {"entityDim":2, "entityTags":wallSurfaces + inletSurface + outletSurface, "name":"NoSlip", "MaterialID":4},
+        {"entityDim":2, "entityTags":wallSurfaces, "name":"NoPenetration", "MaterialID":5},
+        {"entityDim":2, "entityTags":obstructionSurfaces, "name":"Obstruction", "MaterialID":100},
+        {"entityDim":2, "entityTags":orificeSurfaces, "name":"Orifice", "MaterialID":200}
+    ])
 
-    #todo add the mesh refinement too
-    # gmsh.model.mesh.field.add("Cylinder", 1)
-    # gmsh.model.mesh.field.setNumber(1, "Radius", 1.2*obstructionDiameter/2)
-    # gmsh.model.mesh.field.setNumber(1, "VIn", 0.05*lc)
-    # gmsh.model.mesh.field.setNumber(1, "VOut", lc)
-    # gmsh.model.mesh.field.setNumber(1, "XAxis", 0)
-    # gmsh.model.mesh.field.setNumber(1, "XCenter", 0)
-    # gmsh.model.mesh.field.setNumber(1, "YAxis", 0)
-    # gmsh.model.mesh.field.setNumber(1, "YCenter", 0)
-    # gmsh.model.mesh.field.setNumber(1, "ZAxis", 1)
-    # gmsh.model.mesh.field.setNumber(1, "ZCenter", length)
-    # gmsh.model.mesh.field.setAsBackgroundMesh(1)
+    model.Show()
 
-    #* this is supposed to be working already
-    # TPZGmshToolkit.CreateMesh(meshDim)
+    field1 = model.CreateConstantField(entitiesTags=wallSurfaces + inletSurface + outletSurface + obstructionSurfaces, meshSize=meshSize)
+    field2 = model.CreateConstantField(entitiesTags=orificeSurfaces, meshSize=meshSize/10)
 
-    # TPZGmshToolkit.WriteMeshFiles(fileName, ".msh")
+    model.SetMinimumMeshSize([field1, field2])
 
-    # TPZGmshToolkit.End()
+    TPZGmshToolkit.CreateMesh(meshDim)
 
-    # vtk = TPZVtkGenerator()
-    # vtk.Do(fileName, fileName+".msh", ["MaterialID"])
+    TPZGmshToolkit.WriteMeshFiles(outputFile, ".msh")
+
+    TPZGmshToolkit.End()
+
+    vtk = TPZVtkGenerator()
+    vtk.Do(outputFile, f"{outputFile}.msh", ["MaterialID"])
+
+    print(f"All done! Files {outputFile}.msh and {outputFile}.vtk created.")
+
+    return
 
 if __name__ == '__main__':
     main()
