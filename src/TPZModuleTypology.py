@@ -7,41 +7,14 @@ Created by Carlos Puga: 01/13/2024
 #   IMPORTED MODULES
 #   ******************
 import gmsh
-from typing import Any
-from abc import ABCMeta, abstractmethod
-from dataclasses import dataclass, field
 
 from src.TPZGmshToolkit import TPZGmshToolkit
-
-@dataclass
-class ModuleDataStructure(metaclass=ABCMeta):
-    fDeactivateAttr: bool = field(default=False)
-    
-    def DeactivateAttr(self) -> None:
-        self.fDeactivateAttr = True
-
-    def ActivateAttr(self) -> None:
-        self.fDeactivateAttr = False
-
-    def __setattr__(self, name: str, value: Any) -> None:
-        if not self.fDeactivateAttr:
-            super().__setattr__(name, value)
-
-        else:
-            if hasattr(self, name):
-                return super().__setattr__(name, value)
-            
-            else:
-                raise AttributeError(f"Cannot add new attribute '{name}' when attributes are deactivated.")
-            
-    def __str__(self):
-        fields = ', '.join(f"{key}={value}" for key, value in self.__dict__.items())
-        return f"{self.__class__.__name__}({fields})"
+from src.TPZBasicDataStructure import TPZBasicDataStructure
 
 #%% ****************** 
 #   CLASS DEFINITION
 #   ******************
-class TPZModuleTypology(ModuleDataStructure):
+class TPZModuleTypology(TPZBasicDataStructure):
     """
     Base class used to generate the module in which 
     the obstruction will be inserted. Every module is 
