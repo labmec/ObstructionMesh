@@ -3,8 +3,8 @@ class to generate VTK files from Gmsh meshes
 
 Created by Carlos @ 09/15/2025
 """
-
-class TPZVtkGenerator:
+from src.TPZBasicDataStructure import TPZBasicDataStructure
+class TPZVtkGenerator(TPZBasicDataStructure):
     def __init__(self):
         self.fPhysicalNames: list[dict] = []
         self.fEntities: dict[str, list[dict]] = {
