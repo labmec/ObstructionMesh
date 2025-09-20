@@ -156,10 +156,3 @@ class TPZModuleTypology(ModuleDataStructure):
         self.CylinderArcs()
         self.CylinderCurves()
         self.CylinderSurfaces()
-
-    @abstractmethod
-    def Move(self, dx:float, dy:float, dz:float)->None:
-        """
-        Move the module to the desired position
-        """
-        raise NotImplementedError("This method should be overridden in subclasses")

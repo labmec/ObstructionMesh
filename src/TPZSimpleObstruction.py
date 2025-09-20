@@ -137,11 +137,3 @@ class TPZSimpleObstruction(TPZModuleTypology):
         obstructionSurface = gmsh.model.occ.addPlaneSurface([c1])
 
         return obstructionSurface
-    
-    def Move(self, dx:float, dy:float, dz:float):
-        """
-        Moves the module (dx, dy, dz)
-        """
-        gmsh.model.occ.translate([ (3, self.fVolumeID)], dx, dy, dz)
-
-        return

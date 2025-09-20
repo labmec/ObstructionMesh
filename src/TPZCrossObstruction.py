@@ -181,10 +181,3 @@ class TPZCrossObstruction(TPZModuleTypology):
         c1 = gmsh.model.occ.addCurveLoop(curves)
         
         return gmsh.model.occ.addPlaneSurface([c1])
-    
-    def Move(self, dx:float, dy:float, dz:float) -> None:
-        """
-        Moves the module (dx, dy, dz)
-        """
-        gmsh.model.occ.translate([ (3,self.fVolumeID)], dx, dy, dz)
-        return

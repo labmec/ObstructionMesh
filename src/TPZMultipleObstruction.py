@@ -157,9 +157,3 @@ class TPZMultipleObstruction(TPZModuleTypology):
             multipleObs.append(circleSurface)
 
         return multipleObs
-    
-    def Move(self, dx:float, dy:float, dz:float):
-        """
-        Moves the module (dx, dy, dz)
-        """
-        gmsh.model.occ.translate([ (3,self.fVolumeID)], dx, dy, dz)

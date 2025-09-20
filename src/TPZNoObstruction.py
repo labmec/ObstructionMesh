@@ -54,9 +54,3 @@ class TPZNoObstruction(TPZModuleTypology):
         self.fVolumeID = gmsh.model.occ.addVolume([surfaceLoop])
 
         return
-
-    def Move(self, dx:float, dy:float, dz:float) -> None:
-        """
-        Moves the module (dx, dy, dz)
-        """
-        gmsh.model.occ.translate([ (3,self.fVolumeID)], dx, dy, dz)
