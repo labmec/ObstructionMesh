@@ -48,13 +48,6 @@ class TPZModuleTypology(TPZBasicDataStructure):
 
             return 
 
-
-#   ****************** 
-#        METHODS
-#   ******************  
-    def DebugStop(self, message='') -> None:
-        raise ValueError(message + ' YOUR CHANCE TO PUT A BREAK POINT HERE')
-
 #   ****************** 
 #       CYLINDER
 #   ******************  
