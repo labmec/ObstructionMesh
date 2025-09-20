@@ -137,6 +137,15 @@ class TPZCrossObstruction(TPZModuleTypology):
     def ObstructionArcs(self, points:list[int]) -> list[int]:
         """
         Returns the lines belonging to the obstruction
+
+        Inputs:
+        ------
+        points : list of int
+            List of point ids belonging to the obstruction
+        Returns:
+        --------
+        list of int
+            List of line ids belonging to the obstruction
         """
         p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17, p18, p19, p20 = points
 
