@@ -39,11 +39,11 @@ class TPZRandomObstruction(TPZModuleTypology):
     def __init__(self, length: float, lc: float, radius: float, obstructionRadius: float, nObstructions: int, seed: int = None) -> None:
         super().__init__(length=length, lc=lc, radius=radius)
 
-        self.fObstructionRadius = obstructionRadius
-        self.fNumberOfObstructions = nObstructions
-        self.fSeed = seed
-        self.fObstructionCX = 0.0
-        self.fObstructionCY = 0.0
+        self.fObstructionRadius: float = obstructionRadius
+        self.fNumberOfObstructions: int = nObstructions
+        self.fSeed: int = seed
+        self.fObstructionCX: float = 0.0
+        self.fObstructionCY: float = 0.0
 
         self.DeactivateAttr()
 

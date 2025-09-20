@@ -36,9 +36,9 @@ class TPZSimpleObstruction(TPZModuleTypology):
         super().__init__(length=length, lc=lc, radius=radius)
 
         self.fObstructionRadius: float = obstructionRadius
-        self.fObstructionSurface:int = -1
-        self.fObstructionCX:float = 0.
-        self.fObstructionCY:float = 0.
+        self.fObstructionSurface: int = -1
+        self.fObstructionCX: float = 0.
+        self.fObstructionCY: float = 0.
 
         self.DeactivateAttr()
 

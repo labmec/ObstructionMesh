@@ -36,15 +36,15 @@ class TPZModuleTypology(TPZBasicDataStructure):
 #      INITIALIZOR
 #   ******************  
     def __init__(self, length: float, lc: float, radius:float) -> None:
-            self.fLength = length
-            self.fLC = lc
-            self.fRadius = radius
-            self.fPoints = []
-            self.fArcs = []
-            self.fCurves = []
-            self.fSurfaces = []
-            self.fObstructionSurface = -1
-            self.fVolumeID = -1
+            self.fLength: float = length
+            self.fLC: float = lc
+            self.fRadius: float = radius
+            self.fPoints: list = []
+            self.fArcs: list = []
+            self.fCurves: list = []
+            self.fSurfaces: list = []
+            self.fObstructionSurface: int = -1
+            self.fVolumeID: int = -1
 
             return 
 
