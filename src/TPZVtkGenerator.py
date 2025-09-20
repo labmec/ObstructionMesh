@@ -36,7 +36,7 @@ class TPZVtkGenerator(TPZBasicDataStructure):
             })
 
         if len(self.fPhysicalNames) != nPhysical:
-            raise ValueError(f"Expected {nPhysical} physical entities, but found {len(self.fPhysicalNames)}")
+            self.DebugStop(f"Expected {nPhysical} physical entities, but found {len(self.fPhysicalNames)}")
 
         return
 
@@ -138,16 +138,16 @@ class TPZVtkGenerator(TPZBasicDataStructure):
         self.FindEntities(self.fEntities['volumes'], entityLines[volumesStart:])
 
         if len(self.fEntities['nodes']) != int(nNodes):
-            raise ValueError(f"Expected {nNodes} nodes, but found {len(self.fEntities['nodes'])}")
+            self.DebugStop(f"Expected {nNodes} nodes, but found {len(self.fEntities['nodes'])}")
 
         if len(self.fEntities['curves']) != int(nCurves):
-            raise ValueError(f"Expected {nCurves} curves, but found {len(self.fEntities['curves'])}")
+            self.DebugStop(f"Expected {nCurves} curves, but found {len(self.fEntities['curves'])}")
 
         if len(self.fEntities['surfaces']) != int(nSurfaces):
-            raise ValueError(f"Expected {nSurfaces} surfaces, but found {len(self.fEntities['surfaces'])}")
+            self.DebugStop(f"Expected {nSurfaces} surfaces, but found {len(self.fEntities['surfaces'])}")
 
         if len(self.fEntities['volumes']) != int(nVolumes):
-            raise ValueError(f"Expected {nVolumes} volumes, but found {len(self.fEntities['volumes'])}")
+            self.DebugStop(f"Expected {nVolumes} volumes, but found {len(self.fEntities['volumes'])}")
 
         return
 
@@ -179,13 +179,13 @@ class TPZVtkGenerator(TPZBasicDataStructure):
             })
 
         if len(self.fNodes) != int(nNodes):
-            raise ValueError(f"Expected {nNodes} nodes, but found {len(self.fNodes)}")
+            self.DebugStop(f"Expected {nNodes} nodes, but found {len(self.fNodes)}")
 
         if int(minTag) != self.fNodes[0]['tag']:
-            raise ValueError(f"Expected minimum node tag to be {minTag}, but found {self.fNodes[0]['tag']}")
+            self.DebugStop(f"Expected minimum node tag to be {minTag}, but found {self.fNodes[0]['tag']}")
 
         if int(maxTag) != self.fNodes[-1]['tag']:
-            raise ValueError(f"Expected maximum node tag to be {maxTag}, but found {self.fNodes[-1]['tag']}")
+            self.DebugStop(f"Expected maximum node tag to be {maxTag}, but found {self.fNodes[-1]['tag']}")
 
         return
 
@@ -309,7 +309,7 @@ class TPZVtkGenerator(TPZBasicDataStructure):
             field: name of the field (e.g., "MaterialID")
         """
         if field == "MaterialID": return 1, "SCALARS"
-        else: raise ValueError(f"Field '{field}' not recognized")
+        else: self.DebugStop(f"Field '{field}' not recognized")
 
     def Solution(self, field:str) -> str:
         """
